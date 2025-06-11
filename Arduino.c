@@ -1,4 +1,12 @@
+#include <RTClib.h>
 #include <SoftwareSerial.h>
+#include <Wire.h>
+ 
+
+
+RTC_DS3231 rtc;
+int lastExecutedDay = -1;
+
 SoftwareSerial ABC(9, 10); // RX = 9, TX = 10
 
 int inPin1 = 5;
@@ -6,6 +14,12 @@ int inPin2 = 6;
 char plant[20];
 
 void setup() {
+  // -- clock -- //
+    rtc.begin();
+    if (rtc.lostPower()) {
+      rtc.adjust(DateTime(F(__DATE__), F(__TIME__))); // Set RTC to compile time
+  }
+  // ----------- //
   pinMode(13,OUTPUT);
   Serial.begin(115200);      
   ABC.begin(9600);
@@ -22,8 +36,30 @@ void trimNewline(char* str) {
   }
 }
 
-// --recive plant from ESP--//
+
+  // -- pump-- //
+void ActPump(int mlPerDay) {
+  int WaterTime = (mlPerDay * 16);
+  digitalWrite(inPin1, HIGH);
+  delay(WaterTime * 600); 
+  digitalWrite(inPin1, LOW);
+}
+  //-----------//
+
 void loop() {
+  // -- clock -- //
+    DateTime now = rtc.now();
+
+    if (now.hour() == 12 && lastExecutedDay != now.day()) {
+      Plant(); // Your 24-hour task
+      lastExecutedDay = now.day();
+  }
+    delay(60000);
+  //-------------//
+
+}
+  void Plant(){
+  // --recive plant from ESP--//
   if (ABC.available()) {
     byte len = ABC.readBytesUntil('\n', plant, sizeof(plant) - 1);
     plant[len] = '\0'; 
@@ -33,41 +69,22 @@ void loop() {
     Serial.println(plant);
   }
     if (strcmp(plant,"Mint") == 0){
-      int mlPerDay = 180;
-      int WaterTime = (mlPerDay * 16);
-      digitalWrite(inPin1, HIGH);
-      delay(WaterTime * 600); // how much time keeping the pump on
-      digitalWrite(inPin1, LOW);
+      ActPump(300);
       
     }
     if (strcmp(plant,"Rosemary") == 0){
-      int mlPerDay = 180;
-      int WaterTime = (mlPerDay * 16); //how much time to keep the pump on in minents
-      digitalWrite(inPin1, HIGH);
-      delay(WaterTime * 600); // convert to milisecs
-      digitalWrite(inPin1, LOW);
+      ActPump(180);
     }
     if (strcmp(plant,"Lettuce") == 0){
-      int mlPerDay = 180;
-      int WaterTime = (mlPerDay * 16);
-      digitalWrite(inPin1, HIGH);
-      delay(WaterTime * 600); 
-      digitalWrite(inPin1, LOW);
+      ActPump(20);
     }
     if (strcmp(plant,"Cherry Tomatoes") == 0){
-      int mlPerDay = 180;
-      int WaterTime = (mlPerDay * 16);
-      digitalWrite(inPin1, HIGH);``````````````````````````````````````````                                                     
-      delay(WaterTime * 600); 
-      digitalWrite(inPin1, LOW);
+      ActPump(5);
     }
     if (strcmp(plant,"Petunias") == 0){
-      int mlPerDay = 180;
-      int WaterTime = (mlPerDay * 16);
-      digitalWrite(inPin1, HIGH);
-      delay(WaterTime * 600); 
-      digitalWrite(inPin1, LOW);
+      ActPump(80);
     }
     ///////////////////////////
     
   }
+
