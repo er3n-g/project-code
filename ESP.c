@@ -2,6 +2,10 @@
 #include <WiFiClientSecure.h>
 #include <ESP8266HTTPClient.h>
 #include <ArduinoJson.h>
+#include<SoftwareSerial.h>
+
+SoftwareSerial ABC(4, 5);  //D2, D1
+
 
 #define trigPin D5
 #define echoPin D6
@@ -16,6 +20,7 @@ String lastCommand = "";
 
 void setup() {
   Serial.begin(115200);
+  ABC.begin(9600);
   delay(100);
 
   pinMode(trigPin, OUTPUT);
@@ -140,29 +145,19 @@ void loop() {
 
     // Act on commands
     if (lastCommand == "start") {
-      int mlPerDay = 180;
-      int WaterTime = (mlPerDay * 16);
-      
+      ABC.println("Petunias");
     } 
     if (lastCommand == "stop") {
-      int mlPerDay = 180;
-      int WaterTime = (mlPerDay * 16);
-
+      ABC.println("Cherry Tomatoes");
     } 
     if (lastCommand == "reset") {
-      int mlPerDay = 180;
-      int WaterTime = (mlPerDay * 16);
-
+      ABC.println("Lettuce");
     }
     if (lastCommand == "calibrate") {
-      int mlPerDay = 180;
-      int WaterTime = (mlPerDay * 16);
-
+      ABC.println("Rosemary");
     }
     if (lastCommand == "debug") {
-      int mlPerDay = 180;
-      int WaterTime = (mlPerDay * 16);
-
+      ABC.println("Mint");  
     }
     else {
       Serial.println("Unknown command");
