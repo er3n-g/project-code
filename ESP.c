@@ -3,6 +3,11 @@
 #include <ESP8266HTTPClient.h>
 #include <ArduinoJson.h>
 #include<SoftwareSerial.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
 
 SoftwareSerial ABC(4, 5);  //D2, D1
 
@@ -19,6 +24,12 @@ const int httpsPort = 443;
 String lastCommand = "";
 
 void setup() {
+//--LCD--//
+  lcd.begin();
+  lcd.backlight();
+  lcd.setCursor(0, 0);
+  lcd.print("Counter:");
+
   Serial.begin(115200);
   ABC.begin(9600);
   delay(100);
@@ -138,7 +149,14 @@ void loop() {
   } else {
     Serial.println("Invalid distance measurement");
   }
-
+  // -- LCD -- //
+  lcd.setCursor(0, 1);
+  lcd.print("                ");
+  lcd.setCursor(0, 1);
+  lcd.print("Value: ");
+  lcd.print(distance);
+  lcd.print(" cm");
+ //------------//
   lastCommand = fetchCommand();
   if (lastCommand != "") {
     Serial.println("Latest Command: " + lastCommand);
@@ -147,16 +165,16 @@ void loop() {
     if (lastCommand == "start") {
       ABC.println("Petunias");
     } 
-    if (lastCommand == "stop") {
+    else if (lastCommand == "stop") {
       ABC.println("Cherry Tomatoes");
     } 
-    if (lastCommand == "reset") {
+    else if (lastCommand == "reset") {
       ABC.println("Lettuce");
     }
-    if (lastCommand == "calibrate") {
+    else if (lastCommand == "calibrate") {
       ABC.println("Rosemary");
     }
-    if (lastCommand == "debug") {
+    else if (lastCommand == "debug") {
       ABC.println("Mint");  
     }
     else {
